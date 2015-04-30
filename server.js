@@ -1,5 +1,5 @@
+var syslogParser = require('glossy').Parse;
 var dgram = require("dgram");
-
 var socket = dgram.createSocket("udp4");
 
 socket.on("error", function (err) {
@@ -8,8 +8,12 @@ socket.on("error", function (err) {
 });
 
 socket.on("message", function (msg, rinfo) {
-  var jsonObj = { message: msg.toString('utf8').replace(/\r?\n|\r/g, " "), tags: ['sawyer'], sawyer_log_source: rinfo.address };
-  console.log(JSON.stringify(jsonObj));
+  syslogParser.parse(msg.toString('utf8', 0), function(parsedMessage){
+    parsedMessage.tags = ['sawyer'];
+    parsedMessage.sawyer_log_source = rinfo.address;
+
+    console.log(JSON.stringify(parsedMessage));
+  });
 });
 
 socket.on("listening", function () {
