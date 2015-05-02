@@ -31,7 +31,10 @@ socket.on("error", function (err) {
 
 socket.on("message", function (msg, rinfo) {
   syslogParser.parse(msg.toString('utf8', 0), function(parsedMessage){
-    parsedMessage.tags = ['sawyer'];
+    delete parsedMessage.originalMessage;
+    parsedMessage.syslog_type       = parsedMessage.type;
+    parsedMessage.type              = 'sawyer-syslog';
+    parsedMessage.tags              = ['sawyer'];
     parsedMessage.sawyer_log_source = rinfo.address;
 
     redis_client.rpush(['logstash', JSON.stringify(parsedMessage)], function(err, reply) {
