@@ -34,13 +34,18 @@ socket.on("message", function (msg, rinfo) {
     parsedMessage.tags = ['sawyer'];
     parsedMessage.sawyer_log_source = rinfo.address;
 
-    console.log(JSON.stringify(parsedMessage));
+    redis_client.rpush(['logstash', JSON.stringify(parsedMessage)], function(err, reply) {
+      //console.log('result of rpush: ' + reply);
+    });
+
+    //console.log(JSON.stringify(parsedMessage));
+    //console.log('\n');
   });
 });
 
 socket.on("listening", function () {
   var address = socket.address();
-  console.log("server listening " +
+  console.log("sawyer listening on " +
       address.address + ":" + address.port);
 });
 
