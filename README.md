@@ -1,4 +1,4 @@
-# Sawyer
+# Sawyer [![GitHub tag][tag-img]][tag]
 
 Squaring up logs and shipping them to Redis for Logstash
 
@@ -51,3 +51,5 @@ look into receiving GELF messages.
 [gelf-from-app]:http://docs.graylog.org/en/latest/pages/sending_data.html#gelf-sending-from-applications
 [logstash]:http://logstash.net
 [nxlog-ce]:http://nxlog.org/products/nxlog-community-edition
+[tag]: https://github.com/genebean/sawyer
+[tag-img]: https://img.shields.io/github/tag/genebean/sawyer.svg?style=plastic&label=Current%20Release
