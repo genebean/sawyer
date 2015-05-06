@@ -2,6 +2,10 @@
 
 [![GitHub tag][tag-img]][tag]
 
+## v0.2.1
+
+* Added version shield to README.md
+
 ## v0.2.0
 
 * JSON input from NXLog works
