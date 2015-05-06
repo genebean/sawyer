@@ -2,6 +2,10 @@
 
 [![GitHub tag][tag-img]][tag]
 
+## v0.2.0
+
+* JSON input from NXLog works
+
 ## v0.1.1
 
 * First release. Syslog input works.

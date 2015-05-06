@@ -1,6 +1,6 @@
 {
   "name": "sawyer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Squaring up logs and shipping them to Redis for Logstash",
   "main": "server.js",
   "scripts": {
