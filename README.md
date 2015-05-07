@@ -39,9 +39,6 @@ Redis instance. By default, Sawyer
 * listens for JSON on `0.0.0.0:6371`, and
 * talks to Redis on `127.0.0.1:6379`.
 
-It strips these characters from the `Message` field: `\r \n \t` as Windows
-EventLog places quite a few of these in its output.
-
 ### In development
 
 Next up is receiving JSON from sources other than EventLog. After that I plan to

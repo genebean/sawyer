@@ -40,15 +40,12 @@ socket_json.on("error", function (err) {
 });
 
 socket_json.on("message", function (msg, rinfo) {
-  var jsonMessage = msg.toString('utf8');
-  var jsonObj = JSON.parse(jsonMessage);
+  var jsonObj     = JSON.parse(msg.toString('utf8'));
+  var tags        = jsonObj.tags || [];
+  tags.push('sawyer');
 
-  // replace newline characters and tabs with a space
-  cleanedUpMessage = jsonObj.Message.replace(/\r|\n|\t/g, " ");
-  jsonObj.Message = cleanedUpMessage;
-
+  jsonObj.tags              = tags;
   jsonObj.type              = 'sawyer-json';
-  jsonObj.tags              = ['sawyer'];
   jsonObj.sawyer_log_source = rinfo.address;
 
   //console.log(jsonObj);
@@ -75,10 +72,14 @@ socket_syslog.on("error", function (err) {
 
 socket_syslog.on("message", function (msg, rinfo) {
   syslogParser.parse(msg.toString('utf8', 0), function(parsedMessage){
+
+    var tags = parsedMessage.tags || [];
+    tags.push('sawyer');
+
     delete parsedMessage.originalMessage;
     parsedMessage.syslog_type       = parsedMessage.type;
     parsedMessage.type              = 'sawyer-syslog';
-    parsedMessage.tags              = ['sawyer'];
+    parsedMessage.tags              = tags;
     parsedMessage.sawyer_log_source = rinfo.address;
 
     redis_client.rpush(['logstash', JSON.stringify(parsedMessage)], function(err, reply) {
