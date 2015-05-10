@@ -9,8 +9,8 @@ var redis_pass    = config.get('sawyer.redis_password');
 var socket_json   = dgram.createSocket('udp4');
 var socket_syslog = dgram.createSocket('udp4');
 
-socket_json.bind(6371);
 socket_syslog.bind(6370);
+socket_json.bind(6371);
 
 
 function isEmpty(str) {
@@ -53,7 +53,7 @@ socket_json.on("message", function (msg, rinfo) {
   //console.log(JSON.stringify(jsonObj));
   //console.log('\n');
 
-  redis_client.rpush(['logstash', JSON.stringify(jsonObj)], function(err, reply) {
+  redis_client.rpush([ 'logstash', JSON.stringify(jsonObj) ], function(err, reply) {
     //console.log('result of rpush: ' + reply);
   });
 });
@@ -72,7 +72,7 @@ socket_syslog.on("error", function (err) {
 });
 
 socket_syslog.on("message", function (msg, rinfo) {
-  syslogParser.parse(msg.toString('utf8', 0), function(parsedMessage){
+  syslogParser.parse(msg.toString('utf8', 0), function(parsedMessage) {
 
     var tags = parsedMessage.tags || [];
     tags.push('sawyer');
@@ -83,7 +83,7 @@ socket_syslog.on("message", function (msg, rinfo) {
     parsedMessage.tags              = tags;
     parsedMessage.sawyer_log_source = rinfo.address;
 
-    redis_client.rpush(['logstash', JSON.stringify(parsedMessage)], function(err, reply) {
+    redis_client.rpush([ 'logstash', JSON.stringify(parsedMessage) ], function(err, reply) {
       //console.log('result of rpush: ' + reply);
     });
 
