@@ -18,10 +18,11 @@ function isEmpty(str) {
 }
 
 // connect using a password if one was provided
+var redis_client = null;
 if (isEmpty(redis_pass)) {
-  var redis_client = redis.createClient(redis_port, redis_host, {});
+  redis_client = redis.createClient(redis_port, redis_host, {});
 } else {
-  var redis_client = redis.createClient(redis_port, redis_host, {auth_pass: redis_pass});
+  redis_client = redis.createClient(redis_port, redis_host, { auth_pass: redis_pass });
 }
 
 
