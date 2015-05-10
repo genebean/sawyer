@@ -3,14 +3,14 @@ var dgram         = require('dgram');
 var redis         = require('redis');
 var syslogParser  = require('glossy').Parse;
 
-var redis_host    = config.get('sawyer.redis_host');
-var redis_port    = config.get('sawyer.redis_port');
-var redis_pass    = config.get('sawyer.redis_password');
-var socket_json   = dgram.createSocket('udp4');
-var socket_syslog = dgram.createSocket('udp4');
+var redisHost    = config.get('sawyer.redis_host');
+var redisPort    = config.get('sawyer.redis_port');
+var redisPass    = config.get('sawyer.redis_password');
+var socketJson   = dgram.createSocket('udp4');
+var socketSyslog = dgram.createSocket('udp4');
 
-socket_syslog.bind(6370);
-socket_json.bind(6371);
+socketSyslog.bind(6370);
+socketJson.bind(6371);
 
 
 function isEmpty(str) {
@@ -18,29 +18,29 @@ function isEmpty(str) {
 }
 
 // connect using a password if one was provided
-var redis_client = null;
-if (isEmpty(redis_pass)) {
-  redis_client = redis.createClient(redis_port, redis_host, {});
+var redisClient;
+if (isEmpty(redisPass)) {
+  redisClient = redis.createClient(redisPort, redisPost, {});
 } else {
-  redis_client = redis.createClient(redis_port, redis_host, { auth_pass: redis_pass });
+  redisClient = redis.createClient(redisPort, redisHost, { auth_pass: redisPass });
 }
 
 
-redis_client.on('connect', function() {
-  if (isEmpty(redis_pass)) {
-    console.log('Connected to Redis on ' + redis_host + ':' + redis_port);
+redisClient.on('connect', function() {
+  if (isEmpty(redisPass)) {
+    console.log('Connected to Redis on ' + redisHost + ':' + redisPort);
   } else {
-    console.log('Connected to Redis with provided password on ' + redis_host + ':' + redis_port);
+    console.log('Connected to Redis with provided password on ' + redisHost + ':' + redisPort);
   }
 });
 
 // JSON section
-socket_json.on("error", function (err) {
+socketJson.on("error", function (err) {
   console.log("server error:\n" + err.stack);
-  socket_json.close();
+  socketJson.close();
 });
 
-socket_json.on("message", function (msg, rinfo) {
+socketJson.on("message", function (msg, rinfo) {
   var jsonObj     = JSON.parse(msg.toString('utf8'));
   var tags        = jsonObj.tags || [];
   tags.push('sawyer');
@@ -53,25 +53,25 @@ socket_json.on("message", function (msg, rinfo) {
   //console.log(JSON.stringify(jsonObj));
   //console.log('\n');
 
-  redis_client.rpush([ 'logstash', JSON.stringify(jsonObj) ], function(err, reply) {
+  redisClient.rpush([ 'logstash', JSON.stringify(jsonObj) ], function(err, reply) {
     //console.log('result of rpush: ' + reply);
   });
 });
 
-socket_json.on("listening", function () {
-  var address = socket_json.address();
+socketJson.on("listening", function () {
+  var address = socketJson.address();
   console.log("Sawyer is listening for json messages on " +
       address.address + ":" + address.port);
 });
 
 
 // Syslog section
-socket_syslog.on("error", function (err) {
+socketSyslog.on("error", function (err) {
   console.log("server error:\n" + err.stack);
-  socket_syslog.close();
+  socketSyslog.close();
 });
 
-socket_syslog.on("message", function (msg, rinfo) {
+socketSyslog.on("message", function (msg, rinfo) {
   syslogParser.parse(msg.toString('utf8', 0), function(parsedMessage) {
 
     var tags = parsedMessage.tags || [];
@@ -83,7 +83,7 @@ socket_syslog.on("message", function (msg, rinfo) {
     parsedMessage.tags              = tags;
     parsedMessage.sawyer_log_source = rinfo.address;
 
-    redis_client.rpush([ 'logstash', JSON.stringify(parsedMessage) ], function(err, reply) {
+    redisClient.rpush([ 'logstash', JSON.stringify(parsedMessage) ], function(err, reply) {
       //console.log('result of rpush: ' + reply);
     });
 
@@ -92,8 +92,8 @@ socket_syslog.on("message", function (msg, rinfo) {
   });
 });
 
-socket_syslog.on("listening", function () {
-  var address = socket_syslog.address();
+socketSyslog.on("listening", function () {
+  var address = socketSyslog.address();
   console.log("Sawyer is listening for syslog messages on " +
       address.address + ":" + address.port);
 });
