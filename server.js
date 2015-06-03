@@ -17,6 +17,8 @@ function isEmpty(str) {
     return (!str || 0 === str.length);
 }
 
+// Redis client section
+
 // connect using a password if one was provided
 var redis_client = null;
 if (isEmpty(redis_pass)) {
@@ -46,21 +48,28 @@ socket_json.on("error", function (err) {
 });
 
 socket_json.on("message", function (msg, rinfo) {
-  var jsonObj     = JSON.parse(msg.toString('utf8'));
-  var tags        = jsonObj.tags || [];
-  tags.push('sawyer');
+  try {
+    var jsonObj     = JSON.parse(msg.toString('utf8'));
+  } catch(e) {
+    console.log("Caught invalid JSON message, discarding.\n" + e.stack);
+  }
+  
+  if (jsonObj) {
+    var tags        = jsonObj.tags || [];
+    tags.push('sawyer');
 
-  jsonObj.tags              = tags;
-  jsonObj.type              = 'sawyer-json';
-  jsonObj.sawyer_log_source = rinfo.address;
+    jsonObj.tags              = tags;
+    jsonObj.type              = 'sawyer-json';
+    jsonObj.sawyer_log_source = rinfo.address;
 
-  //console.log(jsonObj);
-  //console.log(JSON.stringify(jsonObj));
-  //console.log('\n');
+    //console.log(jsonObj);
+    //console.log(JSON.stringify(jsonObj));
+    //console.log('\n');
 
-  redis_client.rpush([ 'logstash', JSON.stringify(jsonObj) ], function(err, reply) {
-    //console.log('result of rpush: ' + reply);
-  });
+    redis_client.rpush([ 'logstash', JSON.stringify(jsonObj) ], function(err, reply) {
+      //console.log('result of rpush: ' + reply);
+    });
+  }
 });
 
 socket_json.on("listening", function () {
