@@ -34,6 +34,11 @@ redis_client.on('connect', function() {
   }
 });
 
+redis_client.on('error', function(err) {
+  console.log("Redis Client " + err);
+});
+
+
 // JSON section
 socket_json.on("error", function (err) {
   console.log("server error:\n" + err.stack);
